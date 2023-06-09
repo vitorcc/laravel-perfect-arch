@@ -3,6 +3,7 @@
 namespace Tests\Unit;
 
 use App\DTO\UserDTO;
+use App\Models\User;
 use App\Repositories\UserRepository;
 use App\Services\UserService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -15,21 +16,23 @@ class UserServiceTest extends TestCase
     /** @test  */
     public function it_can_create_a_user()
     {
-        $userRepository = $this->createMock(UserRepository::class);
-//        $userRepository = \Mockery::mock(UserRepository::class);
+        $userRepository = \Mockery::mock(UserRepository::class);
         $userService = new UserService($userRepository);
-        $userDTO = new UserDTO('Test User', 'testuser@email.com', 'password');
+        $userDTO = new UserDTO('Test User2', 'testuser2@email.com', 'password2');
 
-//        $userRepository->shouldReceive('createUser')
-//            ->once()
-//            ->andReturn((object)[
-//                'name' => 'Test User',
-//                'email' => 'test@example.com',
-//                'password' => 'password'
-//            ]);
+        $user = new User([
+            'name' => 'Test User2',
+            'email' => 'testuser2@email.com',
+            'password' => 'password2'
+        ]);
 
-        $user = $userService->createUser($userDTO);
-        $this->assertEquals('Test User', $user->name);
-        $this->assertEquals('testuser@email.com', $user->email);
+        $userRepository->shouldReceive('createUser')
+            ->once()
+            ->andReturn($user);
+
+        $createdUser = $userService->createUser($userDTO);
+
+        $this->assertEquals($user->name, $createdUser->name);
+        $this->assertEquals($user->email, $createdUser->email);
     }
 }

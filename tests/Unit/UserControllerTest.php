@@ -20,14 +20,14 @@ class UserControllerTest extends TestCase
 
         $response = $this->postJson('/api/user', $userData);
 
-        $response->assertStatus(200);
+        $response->assertStatus(201);
         $response->assertJsonStructure([
             'name',
-            'email'
+            'email',
         ]);
         $this->assertDatabaseHas('users', [
             'name' => 'name teste',
-            'email' => 'email@teste'
+            'email' => 'email@test',
         ]);
     }
 
