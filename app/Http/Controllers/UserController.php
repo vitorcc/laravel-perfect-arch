@@ -3,8 +3,13 @@
 namespace App\Http\Controllers;
 
 use App\DTO\UserDTO;
+use App\Http\Requests\UserRequest;
 use App\Services\UserService;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
+use Symfony\Component\HttpFoundation\Response as ResponseAlias;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 class UserController
 {
@@ -15,43 +20,92 @@ class UserController
         $this->userService = $userService;
     }
 
-    public function create(Request $request)
+    public function create(UserRequest $request): JsonResponse
     {
-        $userDTO = new UserDTO(
-            $request->input('name'),
-            $request->input('email'),
-            $request->input('password')
-        );
+        try {
+            $userDTO = new UserDTO(
+                $request->input('name'),
+                $request->input('email'),
+                $request->input('password')
+            );
 
-        $user = $this->userService->createUser($userDTO);
+            $user = $this->userService->createUser($userDTO);
 
-        return response()->json($user);
+            return response()->json($user, ResponseAlias::HTTP_CREATED);
+        }catch (\Exception $e){
+            return response()->json([
+                'error' => $e->getMessage()
+            ], ResponseAlias::HTTP_INTERNAL_SERVER_ERROR);
+        }
     }
 
-    public function findById($id)
+    public function findById($id): JsonResponse
     {
-        return $this->userService->findById($id);
+        try {
+            $user = $this->userService->findById($id);
+            return response()->json($user, ResponseAlias::HTTP_OK);
+        }catch (NotFoundHttpException $notFoundHttpException){
+            return response()->json(
+                ['error' => $notFoundHttpException->getMessage()],
+                ResponseAlias::HTTP_NOT_FOUND
+            );
+        }catch (\Exception $e){
+            return response()->json(
+                ['error' => $e->getMessage()],
+                ResponseAlias::HTTP_INTERNAL_SERVER_ERROR
+            );
+        }
     }
 
-    public function findAll()
+    public function findAll(): JsonResponse
     {
-        return $this->userService->findAllUsers();
+        try {
+            $users = $this->userService->findAllUsers();
+            return response()->json($users, ResponseAlias::HTTP_OK);
+        }catch (\Exception $e){
+            return response()->json(
+                ['error' => $e->getMessage()],
+                ResponseAlias::HTTP_INTERNAL_SERVER_ERROR
+            );
+        }
     }
 
-    public function delete(int $id)
+    public function delete(int $id): JsonResponse
     {
-        return $this->userService->deleteUser($id);
+        try {
+            $this->userService->deleteUser($id);
+            return response()->json(
+                ['message' =>'User deleted successfully'],
+                ResponseAlias::HTTP_OK
+            );
+        }catch (NotFoundHttpException $notFoundHttpException){
+            return response()->json(
+                ['error' => $notFoundHttpException->getMessage()],
+                ResponseAlias::HTTP_NOT_FOUND
+            );
+        }catch (\Exception $e){
+            return response()->json(
+                ['error' => $e->getMessage()],
+                ResponseAlias::HTTP_INTERNAL_SERVER_ERROR
+            );
+        }
     }
 
-    public function update($id, Request $request)
+    public function update($id, Request $request): JsonResponse
     {
-        $userDTO = new UserDTO(
-            $request->input('name'),
-            $request->input('email'),
-            $request->input('password')
-        );
-
-        return $this->userService->updateUser($id, $userDTO);
+        try {
+            $userDTO = new UserDTO(
+                $request->input('name'),
+                $request->input('email'),
+                $request->input('password')
+            );
+            $user = $this->userService->updateUser($id, $userDTO);
+            return response()->json($user, ResponseAlias::HTTP_OK);
+        }catch (\Exception $e){
+            return response()->json([
+                'error' => $e->getMessage()
+            ], ResponseAlias::HTTP_INTERNAL_SERVER_ERROR);
+        }
     }
 
 }

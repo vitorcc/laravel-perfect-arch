@@ -5,6 +5,9 @@ namespace App\Services;
 use App\DTO\UserDTO;
 use App\Models\User;
 use App\Repositories\UserRepository;
+use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Database\Eloquent\Model;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 class UserService implements IUserService
 {
@@ -15,12 +18,16 @@ class UserService implements IUserService
         $this->userRepository = $userRepository;
     }
 
-    public function findAllUsers()
+    public function findAllUsers(): Collection
     {
-        return $this->userRepository->findAllUsers();
+        $users = $this->userRepository->findAllUsers();
+        if($users->isEmpty()){
+            throw new NotFoundHttpException('No users found');
+        }
+        return $users;
     }
 
-    public function createUser(UserDTO $userDTO)
+    public function createUser(UserDTO $userDTO): User
     {
         return $this->userRepository->createUser([
             'name' => $userDTO->name,
@@ -29,24 +36,39 @@ class UserService implements IUserService
         ]);
     }
 
-    public function updateUser(int $id, UserDTO $userDTO)
+    public function updateUser(int $id, UserDTO $userDTO): User
     {
         $user = $this->userRepository->findById($id);
+        if(!$user){
+            throw new \Exception('User not found');
+        }
         $user->name = $userDTO->name;
         $user->email = $userDTO->email;
         $user->password = $userDTO->password;
 
-        return $this->userRepository->save($user);
+        $this->userRepository->save($user);
+
+        return $user;
     }
 
-    public function deleteUser(int $id)
+    /**
+     * @throws \Exception
+     */
+    public function deleteUser(int $id): bool
     {
-        $user = $this->userRepository->findById($id);
+        $user = $this->findById($id);
         return $user->delete();
     }
 
-    public function findById(int $id)
+    /**
+     * @throws \Exception
+     */
+    public function findById(int $id): ?Model
     {
-        return $this->userRepository->findById($id);
+        $user = $this->userRepository->findById($id);
+        if(!$user){
+            throw new NotFoundHttpException('User not found');
+        }
+        return $user;
     }
 }

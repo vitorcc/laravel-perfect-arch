@@ -19,7 +19,7 @@ class UserRepository implements IUserRepository
 
     public function findById(int $id)
     {
-        return User::findOrFail($id);
+        return User::find($id);
     }
 
     public function save(User $user)
