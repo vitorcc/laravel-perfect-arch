@@ -11,7 +11,7 @@ use Tests\TestCase;
 
 class UserServiceTest extends TestCase
 {
-    use RefreshDatabase;
+//    use RefreshDatabase;
 
     /** @test  */
     public function it_can_create_a_user()

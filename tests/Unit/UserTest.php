@@ -8,7 +8,7 @@ use Tests\TestCase;
 
 class UserTest extends TestCase
 {
-    use RefreshDatabase;
+//    use RefreshDatabase;
 
     /** @test */
     public function it_can_create_a_user()

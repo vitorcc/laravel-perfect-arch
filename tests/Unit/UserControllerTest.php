@@ -7,7 +7,7 @@ use Tests\TestCase;
 
 class UserControllerTest extends TestCase
 {
-    use RefreshDatabase; //limpa banco após teste
+//    use RefreshDatabase; //limpa banco após teste
 
     /** @test */
     public function it_can_create_a_user()
