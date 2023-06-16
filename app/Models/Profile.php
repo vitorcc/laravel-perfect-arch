@@ -13,7 +13,7 @@ class Profile extends Model
         'name',
     ];
 
-    public function profile(): BelongsToMany
+    public function user(): BelongsToMany
     {
         return $this->belongsToMany(User::class);
     }
